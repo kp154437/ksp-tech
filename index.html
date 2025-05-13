@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>4-in-1 Web Image Editor</title>
+
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #eee;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  h2 {
+    margin: 0;
+  }
+  /* Container for app, fixed size (mobile optimized) */
+  #app {
+    max-width: 350px;
+    max-height: 600px;
+    margin: 10px auto;
+    background: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #0a84ff88;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Navigation tabs */
+  nav {
+    display: flex;
+    background: #0a84ff;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+  }
+  nav button {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 12px 0;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+  nav button.active,
+  nav button:hover {
+    background: #005fdb;
+  }
+
+  /* Main editing area */
+  #editor-container {
+    flex: 1;
+    background: #222;
+    position: relative;
+    user-select:none;
+    overflow: hidden;
+  }
+
+  /* Canvas displays the composite image */
+  #main-canvas {
+    display: block;
+    margin: auto;
+    background: #111;
+    border-radius: 6px;
+    max-width: 100%;
+    max-height: 400px;
+    touch-action: none;
+  }
+
+  /* Control pane */
+  #controls {
+    background: #181818;
+    padding: 10px 12px;
+    color: #ddd;
+    overflow-y: auto;
+    max-height: 160px;
+  }
+  #controls > * {
+    margin-bottom: 8px;
+  }
+
+  /* Sliders styling */
+  label {
+    font-size: 12px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #555;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0a84ff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    margin-top: -4px;
+  }
+
+  /* Stickers container */
+  #stickers-container {
+    display: flex;
+    gap: 6px;
+  }
+  .sticker {
+    width: 40px;
+    height: 40px;
+    cursor: grab;
+    user-select:none;
+  }
+
+  /* Text input overlay */
+  #text-input-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    background: rgba(0,0,0,0.7);
+    border-radius: 4px;
+    color: white;
+    border: 1px solid #0a84ff;
+    padding: 4px 8px;
+    font-size: 14px;
+    display: none;
+    z-index: 1000;
+  }
+
+  /* Layers panel */
+  #layers-panel {
+    background: #202020;
+    max-height: 180px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+  #layers-panel h3 {
+    text-align: center;
+    margin: 6px 0;
+    font-size: 14px;
+    color: #0a84ff;
+  }
+  #layers-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+  }
+  #layers-list li {
+    background: #333;
+    margin-bottom: 4px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    cursor: pointer;
+    user-select:none;
+  }
+  #layers-list li.active-layer {
+    background: #0a84ff;
+    color: white;
+  }
+  #layers-list li span.btn {
+    background: #555;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select:none;
+    margin-left: 6px;
+  }
+  #layers-list li span.btn:hover {
+    background: #0080ff;
+  }
+
+  /* Blend mode selector */
+  select {
+    width: 100%;
+    background: #333;
+    color: #eee;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 13px;
+  }
+
+  /* Buttons style */
+  button.main-btn {
+    background: #0a84ff;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select:none;
+  }
+  button.main-btn:hover {
+    background: #005fdb;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 360px) {
+    #app {
+      margin: 5px 5px;
+      max-width: 100vw;
+      max-height: 100vh;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <nav>
+    <button id="tab-ai" class="active" title="AI Enhancer">AI Enhance</button>
+    <button id="tab-creative" title="Creative Editor">Creative</button>
+    <button id="tab-adjust" title="Photo Adjustment">Adjust</button>
+    <button id="tab-layers" title="Layer Editor">Layers</button>
+  </nav>
+  <div id="editor-container">
+    <canvas id="main-canvas" width="320" height="320" tabindex="0"></canvas>
+    <input type="text" id="text-input-overlay" placeholder="Enter text and press Enter" />
+  </div>
+  <div id="controls">
+    <!-- Controls for current tab injected by JS -->
+  </div>
+</div>
+
+<script>
+  /*
+   * 4-in-1 Image Editor Frontend JS
+   * Implements:
+   * - AI Image Enhancer (upload + backend call)
+   * - Creative Editor (filters, stickers, draw, text)
+   * - Photo Adjustment (brightness, contrast, saturation, highlights, shadows)
+   * - Layer-based editing (multi-layer with move, resize, blend modes)
+   *
+   * Uses HTML5 Canvas to compose layers and apply effects.
+   * Mobile optimized controls.
+   */
+
+  // Constants & Utility
+  const canvas = document.getElementById('main-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // For multiple layers - each layer is an object:
+  // {id, name, type ('image'|'text'|'drawing'|'sticker'), content, x, y, width, height, visible, blendMode, opacity}
+  let layers = [];
+  let activeLayerId = null;
+  let layerIdCounter = 1;
+
+  // Photo adjustment filters, with default values
+  let adjustments = {
+    brightness: 1,
+    contrast: 1,
+    saturation: 1,
+    highlights: 0,
+    shadows: 0,
+  };
+
+  // Creative filters - quick filters applied globally
+  const creativeFilters = {
+    none: '',
+    grayscale: 'grayscale(100%)',
+    sepia: 'sepia(70%)',
+    invert: 'invert(100%)',
+    brightness: 'brightness(1.3)',
+    saturate: 'saturate(1.5)',
+    contrast: 'contrast(1.4)',
+  };
+  let currentCreativeFilter = 'none';
+
+  // State
+  let currentTab = 'ai'; // ai, creative, adjust, layers
+
+  // Drawing state
+  let isDrawing = false;
+  let drawPoints = [];
+  let currentColor = '#0a84ff';
+  let currentLineWidth = 3;
+
+  // Text input overlay for text layers
+  const textInputOverlay = document.getElementById('text-input-overlay');
+  
+  // Stickers - using data URLs (base64) for demo, include 3 stickers
+  const stickers = [
+    {
+      name: 'Star',
+      src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Star_empty.svg/120px-Star_empty.svg.png',
+    },
+    {
+      name: 'Heart',
+      src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Red_Heart.svg/120px-Red_Heart.svg.png',
+    },
+    {
+      name: 'Smile',
+      src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Smiley_face.svg/120px-Smiley_face.svg.png',
+    }
+  ];
+
+  // Blend modes options for layers
+  const blendModes = [
+    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
+    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
+    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'
+  ];
+
+  // Load image helper returning Promise
+  function loadImage(srcOrDataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image: ' + srcOrDataUrl));
+      img.src = srcOrDataUrl;
+    });
+  }
+
+  // Initialize
+  function init() {
+    // Add event listeners for tabs
+    document.getElementById('tab-ai').addEventListener('click', () => switchTab('ai'));
+    document.getElementById('tab-creative').addEventListener('click', () => switchTab('creative'));
+    document.getElementById('tab-adjust').addEventListener('click', () => switchTab('adjust'));
+    document.getElementById('tab-layers').addEventListener('click', () => switchTab('layers'));
+
+    setupCanvasInteraction();
+    switchTab('ai');
+
+    // Start with a blank white base image layer
+    createBlankBaseLayer();
+  }
+
+  // Create a blank white base layer
+  function createBlankBaseLayer(){
+    const baseLayer = {
+      id: layerIdCounter++,
+      name: 'Background',
+      type: 'base',
+      content: null, // will hold image object
+      x: 0,
+      y: 0,
+      width: canvas.width,
+      height: canvas.height,
+      visible: true,
+      blendMode: 'normal',
+      opacity: 1,
+    };
+    // White background image
+    const baseImage = document.createElement('canvas');
+    baseImage.width = canvas.width;
+    baseImage.height = canvas.height;
+    const bctx = baseImage.getContext('2d');
+    bctx.fillStyle = 'white';
+    bctx.fillRect(0, 0, baseImage.width, baseImage.height);
+    baseLayer.content = baseImage;
+
+    layers = [baseLayer];
+    activeLayerId = baseLayer.id;
+    render();
+  }
+
+  // Switch tab and render controls accordingly
+  function switchTab(tab) {
+    currentTab = tab;
+    // Set active button
+    ['ai', 'creative', 'adjust', 'layers'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    });
+
+    renderControls();
+  }
+
+  // Render controls panel according to current tab
+  function renderControls() {
+    const controls = document.getElementById('controls');
+    controls.innerHTML = '';
+    textInputOverlay.style.display = 'none';
+
+    if (currentTab === 'ai') {
+      // AI enhancement controls
+      const uploadLabel = document.createElement('label');
+      uploadLabel.textContent = 'Upload Image to Enhance:';
+      controls.appendChild(uploadLabel);
+
+      const inputFile = document.createElement('input');
+      inputFile.type = 'file';
+      inputFile.accept = 'image/*';
+      inputFile.style.width = '100%';
+      inputFile.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const imgUrl = URL.createObjectURL(file);
+        try {
+          const img = await loadImage(imgUrl);
+          URL.revokeObjectURL(imgUrl);
+          addImageLayer(img, 'Uploaded');
+        } catch(e) {
+          alert('Error loading image: ' + e.message);
+        }
+      });
+      controls.appendChild(inputFile);
+
+      const enhanceBtn = document.createElement('button');
+      enhanceBtn.textContent = 'Enhance Active Layer with AI';
+      enhanceBtn.className = 'main-btn';
+      enhanceBtn.style.marginTop = '10px';
+      enhanceBtn.addEventListener('click', enhanceActiveLayerWithAI);
+      controls.appendChild(enhanceBtn);
+
+      const note = document.createElement('small');
+      note.style.color = '#88aaff';
+      note.style.display = 'block';
+      note.style.marginTop = '6px';
+      note.textContent = 'AI enhancement applies sharpening filter as demo.';
+      controls.appendChild(note);
+
+    } else if (currentTab === 'creative') {
+      // Creative editor: filters, stickers, draw, text
+      // Filters selection
+      const filterLabel = document.createElement('label');
+      filterLabel.textContent = 'Select Filter';
+      controls.appendChild(filterLabel);
+
+      const filterSelect = document.createElement('select');
+      for (const key in creativeFilters) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+        filterSelect.appendChild(opt);
+      }
+      filterSelect.value = currentCreativeFilter;
+      filterSelect.addEventListener('change', e => {
+        currentCreativeFilter = e.target.value;
+        render();
+      });
+      controls.appendChild(filterSelect);
+
+      // Stickers
+      const stickersLabel = document.createElement('label');
+      stickersLabel.textContent = 'Add Sticker (Drag to canvas)';
+      stickersLabel.style.marginTop = '12px';
+      controls.appendChild(stickersLabel);
+
+      const stickersContainer = document.createElement('div');
+      stickersContainer.id = 'stickers-container';
+      stickers.forEach(sticker => {
+        const img = document.createElement('img');
+        img.src = sticker.src;
+        img.alt = sticker.name;
+        img.className = 'sticker';
+        img.draggable = true;
+        // Dragstart event sets sticker src
+        img.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', sticker.src);
+        });
+        stickersContainer.appendChild(img);
+      });
+      controls.appendChild(stickersContainer);
+
+      // Drawing tools
+      const drawLabel = document.createElement('label');
+      drawLabel.textContent = 'Draw Color & Brush Size';
+      drawLabel.style.marginTop = '12px';
+      controls.appendChild(drawLabel);
+
+      // Color input
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.value = currentColor;
+      colorInput.addEventListener('input', e => {
+        currentColor = e.target.value;
+      });
+      controls.appendChild(colorInput);
+
+      // Brush size slider
+      const brushLabel = document.createElement('label');
+      brushLabel.textContent = 'Brush Size';
+      brushLabel.style.marginTop = '6px';
+      controls.appendChild(brushLabel);
+
+      const brushRange = document.createElement('input');
+      brushRange.type = 'range';
+      brushRange.min = 1;
+      brushRange.max = 20;
+      brushRange.value = currentLineWidth;
+      brushRange.addEventListener('input', e => {
+        currentLineWidth = e.target.value;
+      });
+      controls.appendChild(brushRange);
+
+      // Text tool
+      const textBtn = document.createElement('button');
+      textBtn.textContent = 'Add Text';
+      textBtn.className = 'main-btn';
+      textBtn.style.marginTop = '10px';
+      textBtn.addEventListener('click', () => {
+        triggerAddText();
+      });
+      controls.appendChild(textBtn);
+
+    } else if (currentTab === 'adjust') {
+      // Photo Adjustment sliders
+      ['brightness', 'contrast', 'saturation', 'highlights', 'shadows'].forEach(adj => {
+        const label = document.createElement('label');
+        label.textContent = adj.charAt(0).toUpperCase() + adj.slice(1);
+        controls.appendChild(label);
+
+        const range = document.createElement('input');
+        range.type = 'range';
+
+        if(adj === 'brightness' || adj === 'contrast' || adj === 'saturation'){
+          range.min = 0;
+          range.max = 2;
+          range.step = 0.05;
+          range.value = adjustments[adj];
+        } else {
+          range.min = -100;
+          range.max = 100;
+          range.step = 1;
+          range.value = adjustments[adj];
+        }
+
+        range.addEventListener('input', e => {
+          adjustments[adj] = parseFloat(e.target.value);
+          render();
+        });
+        controls.appendChild(range);
+
+      });
+
+    } else if (currentTab === 'layers') {
+      // Layers panel & controls
+      const layersPanel = document.createElement('div');
+      layersPanel.id = 'layers-panel';
+
+      const title = document.createElement('h3');
+      title.textContent = 'Layers';
+      layersPanel.appendChild(title);
+
+      const layersList = document.createElement('ul');
+      layersList.id = 'layers-list';
+      layers.forEach(layer => {
+        const li = document.createElement('li');
+        li.textContent = layer.name;
+        li.dataset.layerId = layer.id;
+        if(layer.id === activeLayerId) {
+          li.classList.add('active-layer');
+        }
+        // Layer select by clicking
+        li.addEventListener('click', () => {
+          activeLayerId = layer.id;
+          renderControls();
+          render();
+        });
+
+        // Visibility toggle button
+        const visBtn = document.createElement('span');
+        visBtn.textContent = layer.visible ? '👁' : '🙈';
+        visBtn.className = 'btn';
+        visBtn.title = 'Toggle Visibility';
+        visBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          layer.visible = !layer.visible;
+          renderControls();
+          render();
+        });
+        li.appendChild(visBtn);
+
+        // Delete button (prevent deleting background base layer)
+        if(layer.type !== 'base'){
+          const delBtn = document.createElement('span');
+          delBtn.textContent = '✖';
+          delBtn.className = 'btn';
+          delBtn.title = 'Delete Layer';
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(confirm(`Delete layer "${layer.name}"?`)){
+              deleteLayer(layer.id);
+            }
+          });
+          li.appendChild(delBtn);
+        }
+
+        layersList.appendChild(li);
+      });
+      layersPanel.appendChild(layersList);
+
+      // Add new blank layer button
+      const addLayerBtn = document.createElement('button');
+      addLayerBtn.textContent = 'Add Blank Layer';
+      addLayerBtn.className = 'main-btn';
+      addLayerBtn.style.marginTop = '8px';
+      addLayerBtn.addEventListener('click', () => {
+        addBlankLayer();
+      });
+      layersPanel.appendChild(addLayerBtn);
+
+      // Blend mode for active layer selector
+      const activeLayer = layers.find(l => l.id === activeLayerId);
+      if(activeLayer && activeLayer.type !== 'base') {
+        const blendLabel = document.createElement('label');
+        blendLabel.textContent = 'Blend Mode for "' + activeLayer.name + '"';
+        blendLabel.style.marginTop = '12px';
+        layersPanel.appendChild(blendLabel);
+
+        const blendSelect = document.createElement('select');
+        blendModes.forEach(mode => {
+          const opt = document.createElement('option');
+          opt.value = mode;
+          opt.textContent = mode;
+          blendSelect.appendChild(opt);
+        });
+        blendSelect.value = activeLayer.blendMode || 'normal';
+        blendSelect.addEventListener('change', e => {
+          activeLayer.blendMode = e.target.value;
+          render();
+        });
+        layersPanel.appendChild(blendSelect);
+
+        // Opacity slider
+        const opacityLabel = document.createElement('label');
+        opacityLabel.textContent = 'Opacity for "' + activeLayer.name + '"';
+        opacityLabel.style.marginTop = '8px';
+        layersPanel.appendChild(opacityLabel);
+
+        const opacityRange = document.createElement('input');
+        opacityRange.type = 'range';
+        opacityRange.min = 0;
+        opacityRange.max = 1;
+        opacityRange.step = 0.01;
+        opacityRange.value = activeLayer.opacity || 1;
+        opacityRange.addEventListener('input', e => {
+          activeLayer.opacity = parseFloat(e.target.value);
+          render();
+        });
+        layersPanel.appendChild(opacityRange);
+      }
+
+      // Export final image button
+      const exportBtn = document.createElement('button');
+      exportBtn.textContent = 'Export Final Image';
+      exportBtn.className = 'main-btn';
+      exportBtn.style.marginTop = '12px';
+      exportBtn.addEventListener('click', () => {
+        exportFinalImage();
+      });
+      layersPanel.appendChild(exportBtn);
+
+      controls.appendChild(layersPanel);
+    }
+  }
+
+  // Delete layer by id
+  function deleteLayer(id) {
+    const idx = layers.findIndex(l => l.id === id);
+    if(idx >= 0){
+      layers.splice(idx, 1);
+      // Select another layer
+      if(layers.length > 0){
+        activeLayerId = layers[layers.length - 1].id;
+      } else {
+        createBlankBaseLayer();
+      }
+      renderControls();
+      render();
+    }
+  }
+
+  // Add a blank transparent layer
+  function addBlankLayer(){
+    const c = document.createElement('canvas');
+    c.width = canvas.width;
+    c.height = canvas.height;
+    const bctx = c.getContext('2d');
+    bctx.clearRect(0,0,c.width,c.height);
+    const newLayer = {
+      id: layerIdCounter++,
+      name: 'Layer ' + layerIdCounter,
+      type: 'image',
+      content: c,
+      x: 0,
+      y: 0,
+      width: c.width,
+      height: c.height,
+      visible: true,
+      blendMode: 'normal',
+      opacity: 1,
+    };
+    layers.push(newLayer);
+    activeLayerId = newLayer.id;
+    renderControls();
+    render();
+  }
+
+  // Add image as new layer (on top)
+  function addImageLayer(img, name = 'Image') {
+    // Create canvas for this layer to allow resizing/move/draw later
+    const c = document.createElement('canvas');
+    c.width = canvas.width;
+    c.height = canvas.height;
+    const bctx = c.getContext('2d');
+    bctx.clearRect(0, 0, c.width, c.height);
+    // Draw image centered and scaled to canvas width/height fit
+    let scale = Math.min(c.width / img.width, c.height / img.height);
+    let w = img.width * scale;
+    let h = img.height * scale;
+    let x = (c.width - w) / 2;
+    let y = (c.height - h) / 2;
+    bctx.drawImage(img, x, y, w, h);
+
+    const newLayer = {
+      id: layerIdCounter++,
+      name: name,
+      type: 'image',
+      content: c,
+      x: 0,
+      y: 0,
+      width: c.width,
+      height: c.height,
+      visible: true,
+      blendMode: 'normal',
+      opacity: 1,
+    };
+    layers.push(newLayer);
+    activeLayerId = newLayer.id;
+    renderControls();
+    render();
+  }
+
+  // Add sticker as new layer (image)
+  async function addStickerLayer(src) {
+    try {
+      const img = await loadImage(src);
+      const c = document.createElement('canvas');
+      const scale = 0.3; // sticker scale relative to canvas size
+      c.width = img.width * scale;
+      c.height = img.height * scale;
+      const bctx = c.getContext('2d');
+      bctx.clearRect(0, 0, c.width, c.height);
+      bctx.drawImage(img, 0, 0, c.width, c.height);
+
+      const newLayer = {
+        id: layerIdCounter++,
+        name: 'Sticker',
+        type: 'sticker',
+        content: c,
+        x: (canvas.width - c.width) / 2,
+        y: (canvas.height - c.height) / 2,
+        width: c.width,
+        height: c.height,
+        visible: true,
+        blendMode: 'normal',
+        opacity: 1,
+      };
+      layers.push(newLayer);
+      activeLayerId = newLayer.id;
+      renderControls();
+      render();
+    } catch(e) {
+      alert('Failed to load sticker image.');
+    }
+  }
+
+  // Add text layer
+  function addTextLayer(text) {
+    // Use hidden textarea to measure text size
+    const ctxTemp = document.createElement('canvas').getContext('2d');
+    // Use large font for measurement
+    const fontSize = 36;
+    ctxTemp.font = `${fontSize}px Segoe UI, sans-serif`;
+    const measure = ctxTemp.measureText(text);
+    const w = Math.ceil(measure.width);
+    const h = fontSize * 1.2;
+
+    // Create canvas for text
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const bctx = c.getContext('2d');
+    bctx.clearRect(0, 0, w, h);
+    bctx.font = `${fontSize}px Segoe UI, sans-serif`;
+    bctx.fillStyle = '#0a84ff';
+    bctx.textBaseline = 'top';
+    bctx.fillText(text, 0, 0);
+
+    const newLayer = {
+      id: layerIdCounter++,
+      name: 'Text',
+      type: 'text',
+      content: c,
+      x: (canvas.width - w)/2,
+      y: (canvas.height - h)/2,
+      width: w,
+      height: h,
+      visible: true,
+      blendMode: 'normal',
+      opacity: 1,
+    };
+    layers.push(newLayer);
+    activeLayerId = newLayer.id;
+    renderControls();
+    render();
+  }
+
+  // Trigger text input with position centered
+  function triggerAddText() {
+    textInputOverlay.value = '';
+    textInputOverlay.style.top = (canvas.offsetTop + canvas.height / 2 - 15) + 'px';
+    textInputOverlay.style.left = (canvas.offsetLeft + canvas.width/2 - 80) + 'px';
+    textInputOverlay.style.width = '160px';
+    textInputOverlay.style.display = 'block';
+    textInputOverlay.focus();
+  }
+
+  // Apply photo adjustment CSS filter string generation for canvas context
+  function getAdjustmentFilterString() {
+    // brightness, contrast, saturation are >=0 floats, highlights/shadows from -100 to 100
+    // We apply highlights and shadows with simple custom blend via canvas pixel manipulation - complicated for realtime - so approximate with brightness shifts
+    let b = adjustments.brightness;
+    let c = adjustments.contrast;
+    let s = adjustments.saturation;
+
+    // Compose CSS filter string for creative filters + photo adjustments
+    let filterStr = `brightness(${b}) contrast(${c}) saturate(${s})`;
+
+    // Highlights (increase brightness for light pixels)
+    if(adjustments.highlights !== 0){
+      let hlAdjust = 1 + adjustments.highlights / 200; // map -100:100 to 0.5:1.5 approx
+      filterStr += ` brightness(${hlAdjust})`;
+    }
+    if(adjustments.shadows !== 0){
+      let shAdjust = 1 + adjustments.shadows / 200;
+      filterStr += ` brightness(${shAdjust})`;
+    }
+
+    return filterStr;
+  }
+
+  // Render final composited image on main canvas
+  function render() {
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Render layers in order
+    layers.forEach(layer => {
+      if(!layer.visible) return;
+      ctx.globalAlpha = layer.opacity === undefined ? 1 : layer.opacity;
+      ctx.globalCompositeOperation = layer.blendMode || 'source-over';
+
+      // Determine draw position and size
+      let dx = layer.x || 0;
+      let dy = layer.y || 0;
+      let dw = layer.width || canvas.width;
+      let dh = layer.height || canvas.height;
+
+      if(layer.type === 'base'){
+        // base layer is HTMLCanvasElement prefilled white
+        ctx.drawImage(layer.content, dx, dy, dw, dh);
+      } else if(layer.type === 'image' || layer.type === 'sticker' || layer.type === 'text'){
+        ctx.drawImage(layer.content, dx, dy, dw, dh);
+      } else if(layer.type === 'drawing'){
+        ctx.drawImage(layer.content, dx, dy, dw, dh);
+      }
+    });
+
+    // Apply creative filter and photo adjustment CSS filters to canvas
+    canvas.style.filter = `${creativeFilters[currentCreativeFilter]} ${getAdjustmentFilterString()}`;
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // Setup canvas interaction for drawing, dragging, resizing layers
+  function setupCanvasInteraction(){
+    // For drawing and dragging
+    let pointerId = null;
+    let dragStart = null;
+    let dragLayer = null;
+    let mode = null; // 'drawing' or 'dragging'
+
+    canvas.style.touchAction = 'none';
+
+    canvas.addEventListener('pointerdown', e => {
+      // Determine if active layer is drawing or draggable type
+      const activeLayer = layers.find(l => l.id === activeLayerId);
+      if(!activeLayer) return;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const cx = e.clientX - canvasRect.left;
+      const cy = e.clientY - canvasRect.top;
+
+      // Check if point inside active layer rect
+      if(cx >= activeLayer.x && cx <= activeLayer.x + activeLayer.width
+        && cy >= activeLayer.y && cy <= activeLayer.y + activeLayer.height){
+          if(currentTab === 'creative' && activeLayer.type === 'drawing'){
+            // Start drawing on drawing layer
+            isDrawing = true;
+            drawPoints = [{x: cx - activeLayer.x, y: cy - activeLayer.y}];
+            mode = 'drawing';
+          } else if(currentTab === 'layers'){
+            // Start dragging active layer
+            dragStart = {x: cx, y: cy};
+            dragLayer = activeLayer;
+            mode = 'dragging';
+          }
+        }
+    }, {passive: false});
+
+    canvas.addEventListener('pointermove', e => {
+      if(!mode) return;
+      const canvasRect = canvas.getBoundingClientRect();
+      const cx = e.clientX - canvasRect.left;
+      const cy = e.clientY - canvasRect.top;
+
+      if(mode === 'drawing' && isDrawing){
+        drawPoints.push({x: cx - layers.find(l => l.id === activeLayerId).x,
+          y: cy - layers.find(l => l.id === activeLayerId).y});
+        drawOnActiveDrawingLayer();
+      } else if(mode === 'dragging' && dragLayer && dragStart){
+        const dx = cx - dragStart.x;
+        const dy = cy - dragStart.y;
+
+        dragLayer.x += dx;
+        dragLayer.y += dy;
+        dragStart = {x: cx, y: cy};
+        render();
+      }
+    });
+
+    canvas.addEventListener('pointerup', e => {
+      if(mode === 'drawing'){
+        isDrawing = false;
+        drawPoints = [];
+        mode = null;
+      } else if(mode === 'dragging'){
+        dragLayer = null;
+        dragStart = null;
+        mode = null;
+      }
+    });
+
+    // Initialize a dedicated drawing layer if none exists
+    let hasDrawingLayer = layers.some(l => l.type === 'drawing');
+    if(!hasDrawingLayer){
+      createDrawingLayer();
+    }
+
+    // Stickers drag drop to canvas
+    canvas.addEventListener('dragover', e => {
+      e.preventDefault();
+    });
+    canvas.addEventListener('drop', async e => {
+      e.preventDefault();
+      const src = e.dataTransfer.getData('text/plain');
+      if(src) {
+        await addStickerLayer(src);
+      }
+    });
+  }
+
+  // Create dedicated drawing layer if none
+  function createDrawingLayer(){
+    const c = document.createElement('canvas');
+    c.width = canvas.width;
+    c.height = canvas.height;
+    const bctx = c.getContext('2d');
+    bctx.clearRect(0, 0, c.width, c.height);
+
+    const existingDrawLayer = layers.find(l => l.type === 'drawing');
+    if(!existingDrawLayer){
+      const layer = {
+        id: layerIdCounter++,
+        name: 'Drawing',
+        type: 'drawing',
+        content: c,
+        x: 0,
+        y: 0,
+        width: c.width,
+        height: c.height,
+        visible: true,
+        blendMode: 'normal',
+        opacity: 1,
+      };
+      layers.push(layer);
+      renderControls();
+      render();
+    }
+  }
+
+  // Draw on active drawing layer from drawPoints with current brush & color
+  function drawOnActiveDrawingLayer(){
+    const drawLayer = layers.find(l => l.id === activeLayerId && l.type === 'drawing');
+    if(!drawLayer || drawPoints.length < 2) return;
+    const ctxDraw = drawLayer.content.getContext('2d');
+    ctxDraw.lineJoin = 'round';
+    ctxDraw.lineCap = 'round';
+    ctxDraw.strokeStyle = currentColor;
+    ctxDraw.lineWidth = currentLineWidth;
+
+    const p1 = drawPoints[drawPoints.length - 2];
+    const p2 = drawPoints[drawPoints.length - 1];
+    ctxDraw.beginPath();
+    ctxDraw.moveTo(p1.x, p1.y);
+    ctxDraw.lineTo(p2.x, p2.y);
+    ctxDraw.stroke();
+
+    render();
+  }
+
+  // Export final composited image as PNG for download
+  function exportFinalImage() {
+    // Create an offscreen canvas same size
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = canvas.width;
+    outCanvas.height = canvas.height;
+    const outCtx = outCanvas.getContext('2d');
+
+    // Render all layers respecting blendMode, opacity, visibility
+    layers.forEach(layer => {
+      if(!layer.visible) return;
+      outCtx.globalAlpha = layer.opacity === undefined ? 1 : layer.opacity;
+      outCtx.globalCompositeOperation = layer.blendMode || 'source-over';
+
+      const dx = layer.x || 0;
+      const dy = layer.y || 0;
+      const dw = layer.width || canvas.width;
+      const dh = layer.height || canvas.height;
+
+      outCtx.drawImage(layer.content, dx, dy, dw, dh);
+    });
+
+    // Because filters are CSS on canvas, must apply adjustments via pixel manipulation
+    // A full implementation would apply filters here too for export
+    // For demo, just export raw composited image
+
+    const dataURL = outCanvas.toDataURL('image/png');
+
+    // Download
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = 'edited-image.png';
+    a.click();
+  }
+
+  // Enhance active layer with AI backend
+  async function enhanceActiveLayerWithAI() {
+    const activeLayer = layers.find(l => l.id === activeLayerId);
+    if(!activeLayer){
+      alert('No active layer to enhance');
+      return;
+    }
+
+    // Get image data of active layer on canvas
+    // Create temp canvas the size of active layer content
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = activeLayer.width;
+    tempCanvas.height = activeLayer.height;
+    const tctx = tempCanvas.getContext('2d');
+    // Draw layer content with adjustments and filter applied (not fully replicated)
+    tctx.drawImage(activeLayer.content, 0, 0, activeLayer.width, activeLayer.height);
+
+    // Extract base64 data url
+    const dataURL = tempCanvas.toDataURL('image/png');
+
+    // Send to backend via fetch /enhance_base64 POST
+    try {
+      // Show loading indicator
+      document.getElementById('controls').innerHTML = '<p style="text-align:center;">Enhancing AI, please wait...</p>';
+
+      const resp = await fetch('/enhance_base64', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({image: dataURL})
+      });
+
+      const json = await resp.json();
+      if(resp.ok && json.image){
+        // Load enhanced image
+        const enhancedImg = await loadImage(json.image);
+        // Replace active layer content with enhanced image (draw on existing canvas)
+        const c = activeLayer.content;
+        const cctx = c.getContext('2d');
+        cctx.clearRect(0, 0, c.width, c.height);
+
+        // Draw enhanced image scaled to layer size
+        cctx.drawImage(enhancedImg, 0, 0, c.width, c.height);
+        
+        renderControls();
+        render();
+      } else {
+        alert('Error in AI enhancement: ' + (json.error || 'Unknown error'));
+        renderControls();
+      }
+    } catch(e){
+      alert('Request failed: ' + e.message);
+      renderControls();
+    }
+  }
+
+  // Text input overlay handlers
+  textInputOverlay.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      const val = textInputOverlay.value.trim();
+      if(val.length > 0){
+        addTextLayer(val);
+      }
+      textInputOverlay.style.display = 'none';
+      e.preventDefault();
+      renderControls();
+      render();
+    } else if(e.key === 'Escape'){
+      textInputOverlay.style.display = 'none';
+      e.preventDefault();
+    }
+  });
+
+  // Start app
+  window.onload = () => {
+    init();
+  };
+
+</script>
+</body>
+</html>
+
