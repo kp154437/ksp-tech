@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emergent-Style Builder Platform</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Emergent-Style Builder</h1>
+      <button id="deployBtn" class="primary">Deploy Preview</button>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2>Project Request</h2>
+        <p class="muted">Describe what you want to build.</p>
+        <textarea id="prompt" rows="6" placeholder="Build a CRM with customer pipeline, team login, and analytics dashboard."></textarea>
+        <div class="actions">
+          <button id="planBtn" class="primary">Generate Plan</button>
+          <button id="runBtn">Run Agent</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Execution Plan</h2>
+        <ul id="planList" class="timeline"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Run Timeline</h2>
+        <ul id="runList" class="timeline"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Status</h2>
+        <div class="stat-grid">
+          <div class="stat"><span>Run State</span><strong id="runState">idle</strong></div>
+          <div class="stat"><span>Branch</span><strong id="branch">-</strong></div>
+          <div class="stat"><span>Preview URL</span><strong id="preview">-</strong></div>
+          <div class="stat"><span>Last Update</span><strong id="updated">-</strong></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
