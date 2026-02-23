@@ -50,12 +50,10 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  padding: 6rem 2rem 10rem;
-  /* Increased padding for royal feel */
+  padding: clamp(4rem, 10vh, 6rem) clamp(1rem, 5vw, 2rem) 10rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* PERFECT HORIZONTAL CENTERING */
   justify-content: flex-start;
   overflow-y: auto;
   overflow-x: hidden;
@@ -187,13 +185,13 @@ h2,
 h3 {
   font-family: 'Cinzel', serif;
   color: var(--gold-soft);
-  letter-spacing: 4px;
+  letter-spacing: clamp(2px, 1vw, 4px);
   text-transform: uppercase;
   font-weight: 700;
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   text-align: center;
-  /* MANDATORY CENTERING */
   margin-bottom: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2rem);
 }
 
 .script-font {
@@ -295,10 +293,11 @@ h3 {
 
 .mantra-line {
   font-family: 'Noto Serif Devanagari', serif;
-  font-size: 2rem;
+  font-size: clamp(1.2rem, 4vw, 2rem);
   color: var(--gold-soft);
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
   position: relative;
   overflow: hidden;
   width: 0;
@@ -725,7 +724,7 @@ h3 {
 
 .vellum-symbol {
   font-family: 'Noto Serif Devanagari', serif;
-  font-size: 5rem;
+  font-size: clamp(3rem, 15vw, 5rem);
   color: var(--maroon-deep);
   opacity: 0.3;
   animation: glow-symbol 4s infinite alternate;
@@ -798,11 +797,9 @@ h3 {
 }
 
 .ganpati-visual {
-  width: 320px;
-  /* Standardize size */
+  width: min(80vw, 320px);
   height: auto;
   margin: 0 auto 2rem;
-  /* CENTERED */
   filter: drop-shadow(0 0 35px var(--gold-metallic));
   animation: float 4s infinite ease-in-out;
   display: block;
@@ -859,8 +856,7 @@ h3 {
 .symbols-container {
   display: flex;
   justify-content: center;
-  /* CENTER ALIGN */
-  gap: 3rem;
+  gap: clamp(1.5rem, 5vw, 3rem);
   margin: 3rem 0;
   width: 100%;
 }
@@ -905,7 +901,7 @@ h3 {
 section {
   width: 100%;
   max-width: 800px;
-  padding: 4rem 2rem;
+  padding: clamp(2rem, 8vh, 4rem) clamp(1rem, 5vw, 2rem);
   text-align: center;
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 }
@@ -914,7 +910,7 @@ section {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   border: 2px solid var(--gold-metallic);
-  padding: 3.5rem;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
   border-radius: 24px;
   position: relative;
   overflow: hidden;
@@ -939,11 +935,9 @@ section {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  /* PERFECT HORIZONTAL SPREAD */
   align-items: flex-start;
-  gap: 5rem;
-  /* Standardized gap */
-  padding: 4rem 2rem;
+  gap: clamp(2rem, 10vw, 5rem);
+  padding: clamp(2rem, 8vh, 4rem) 1rem;
   width: 100%;
 }
 
@@ -954,9 +948,8 @@ section {
 
 .frame-container {
   position: relative;
-  width: 280px;
-  /* INCREASED SIZE FOR PROMINENCE */
-  height: 380px;
+  width: min(90vw, 280px);
+  height: clamp(300px, 100vw, 380px);
   margin: 0 auto 2rem;
   padding: 12px;
   background: var(--gold-gradient);
@@ -1009,11 +1002,24 @@ section {
   text-align: left;
 }
 
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: left !important;
+    padding-left: 50px;
+  }
+}
+
 .timeline-item h3 {
   margin-top: 0;
   margin-bottom: 0.5rem;
   text-align: inherit;
-  /* FOLLOW PARENT (Left/Right) */
   font-size: 1.5rem;
 }
 
@@ -1024,9 +1030,7 @@ section {
 .timeline-dot {
   position: absolute;
   top: 8px;
-  /* ALIGN VERTICALLY WITH TEXT CENTER */
   width: 24px;
-  /* Slightly larger for prominence */
   height: 24px;
   background: var(--gold-soft);
   border-radius: 50%;
@@ -1037,12 +1041,19 @@ section {
 
 .timeline-item:nth-child(odd) .timeline-dot {
   right: -108px;
-  /* PERFECTLY CENTER ON LINE */
 }
 
 .timeline-item:nth-child(even) .timeline-dot {
   left: -12px;
-  /* PERFECTLY CENTER ON LINE */
+}
+
+@media (max-width: 768px) {
+
+  .timeline-item:nth-child(odd) .timeline-dot,
+  .timeline-item:nth-child(even) .timeline-dot {
+    left: 8px !important;
+    right: auto !important;
+  }
 }
 
 /* Countdown */
@@ -1135,7 +1146,8 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 5vw, 2rem);
   margin: 4rem 0;
   width: 100%;
 }
@@ -1143,8 +1155,8 @@ section {
 .count-box {
   background: var(--glass-bg);
   border: 1px solid var(--gold-metallic);
-  padding: 1.5rem;
-  min-width: 100px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  min-width: clamp(80px, 20vw, 100px);
   border-radius: 10px;
 }
 
@@ -1202,9 +1214,8 @@ section {
 /* Family Section Perfection */
 .family-section {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 3rem;
-  /* Increased gap for royal feel */
   margin: 3rem auto;
   width: 100%;
   max-width: 800px;
