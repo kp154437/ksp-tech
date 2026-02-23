@@ -884,10 +884,7 @@ h3 {
 }
 
 .couple-names {
-  font-size: 4.5rem;
-
-
-
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
   background: var(--gold-gradient);
   -webkit-background-clip: text;
   background-clip: text;
