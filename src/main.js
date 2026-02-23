@@ -28,8 +28,10 @@ const cursorDot = document.getElementById('cursor-dot')
 const petalContainer = document.getElementById('petal-container')
 const progressBar = document.getElementById('progress-bar')
 
+import musicUrl from '../public/assets/music.mp3'
+
 // Sound FX
-const bellSound = new Audio('public/assets/music.mp3') // Placeholder temple bell
+const bellSound = new Audio(musicUrl) // Placeholder temple bell
 bellSound.volume = 1.0
 
 // Page Elements
