@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Invitation | Royal & Divine</title>
+</head>
+
+<!-- Background Particles & Petals -->
+<canvas id="particle-canvas"></canvas>
+<div class="petal-container" id="petal-container"></div>
+<div class="silk-overlay"></div>
+
+<!-- Floating 3D Deities -->
+<div class="floating-deity deity-1">🪔</div>
+<div class="floating-deity deity-2">🏺</div>
+<div class="floating-deity deity-3">🪁</div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<!-- Velvet Curtain Opening -->
+<div class="curtain-container" id="curtain">
+  <div class="curtain-side curtain-left"></div>
+  <div class="curtain-side curtain-right"></div>
+  <div class="diya-light"></div>
+  <div class="tap-text" id="tap-text">
+    <span>Tap to Open Invite</span>
+  </div>
+</div>
+
+<!-- Royal Envelope Stage -->
+<div class="envelope-container" id="envelope">
+  <div class="envelope-half envelope-top">
+    <div class="royal-seal"></div>
+  </div>
+  <div class="envelope-half envelope-bottom"></div>
+</div>
+
+<!-- Vellum Overlay Stage -->
+<div class="vellum-overlay" id="vellum">
+  <div class="vellum-texture"></div>
+  <div class="vellum-symbol">॥ ॐ ॥</div>
+</div>
+
+<!-- Royal Progress Ribbon -->
+<div class="royal-progress-container">
+  <div class="royal-progress-bar" id="progress-bar"></div>
+</div>
+
+<!-- Cinematic Page Navigator -->
+<nav class="page-navigator" id="page-nav">
+  <div class="nav-dot active" data-page="0" title="Home"></div>
+  <div class="nav-dot" data-page="1" title="Our Story"></div>
+  <div class="nav-dot" data-page="2" title="Events"></div>
+  <div class="nav-dot" data-page="3" title="Gallery & Family"></div>
+  <div class="nav-dot" data-page="4" title="RSVP"></div>
+</nav>
+
+<!-- Audio Controller -->
+<div class="audio-toggle" id="audio-btn">
+  <span id="audio-icon">🔊</span>
+</div>
+
+<!-- Audio (Hidden) -->
+<audio id="mantra-audio" loop>
+  <source src="public\assets\music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Main Content (SPA Container) -->
+<main id="main-reveal">
+  <!-- Page 0: Home / Hero -->
+  <div class="invitation-page active" id="page-0">
+    <div class="silk-overlay"></div>
+    <div class="blooming-border border-top-left"></div>
+
+    <div class="ganpati-section">
+      <img src="public\download (1).jfif" alt="Ganpati Bappa" class="ganpati-visual" id="ganpati">
+
+      <div class="divine-mantra-container" id="mantra-reveal-container">
+        <div class="sparkle-pen" id="sparkle-pen"></div>
+        <div class="mantra-line handwritten-text" id="mantra-line-1">॥ श्री गणेशाय नमः ॥</div>
+        <div class="mantra-line handwritten-text" id="mantra-line-2">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।</div>
+        <div class="mantra-line handwritten-text" id="mantra-line-3">निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥</div>
+      </div>
+    </div>
+
+    <!-- Sacred Symbols -->
+    <div class="symbols-container">
+      <svg class="symbol" id="symbol-1" viewBox="0 0 24 24">
+        <path
+          d="M12,2L12,6L18,6L18,10L22,10L22,2L12,2M12,22L12,18L6,18L6,14L2,14L2,22L12,22M22,14L18,14L18,22L22,22L22,14M6,10L2,10L2,2L6,2L6,10M11,11H13V13H11V11Z" />
+      </svg>
+      <svg class="symbol" id="symbol-2" viewBox="0 0 24 24">
+        <path
+          d="M12,2A3,3 0 0,1 15,5V7H9V5A3,3 0 0,1 12,2M12,19A5,5 0 0,1 7,14C7,11.24 9.24,9 12,9C14.76,9 17,11.24 17,14A5,5 0 0,1 12,19M12,21A7,7 0 0,0 19,14C19,10.13 15.87,7 12,7C8.13,7 5,10.13 5,14A7,7 0 0,0 12,21Z" />
+      </svg>
+      <svg class="symbol" id="symbol-3" viewBox="0 0 24 24">
+        <path
+          d="M12,2C13,2 14,2.5 14,3.5C14,4.5 13,5 12,5C11,5 10,4.5 10,3.5C10,2.5 11,2 12,2M12,7C14.76,7 17,9.24 17,12C17,14.76 14.76,17 12,17C9.24,17 7,14.76 7,12C7,9.24 9.24,7 12,7M12,19A7,7 0 0,1 5,12A7,7 0 0,1 12,5A7,7 0 0,1 19,12A7,7 0 0,1 12,19Z" />
+      </svg>
+    </div>
+
+    <div class="couple-reveal" id="couple">
+      <svg class="handwritten-svg" viewBox="0 0 400 100">
+        <path class="handwritten-path" id="couple-name-path"
+          d="M20,60 C40,20 60,80 80,40 M100,50 L120,50 M140,60 C160,20 180,80 200,40 M220,50 L240,50 M260,60 C280,20 300,80 320,40" />
+      </svg>
+      <h1 class="couple-names">ritesh & kalyani</h1>
+      <p class="script-font" style="font-size: 1.5rem; color: var(--gold-soft);">A Celebration of Marrige</p>
+    </div>
+
+    <section>
+      <h3>The Big Day Approaches</h3>
+      <div class="countdown-container" id="countdown">
+        <div class="count-box"><span class="count-num" id="days">00</span><span class="count-label">Days</span></div>
+        <div class="count-box"><span class="count-num" id="hours">00</span><span class="count-label">Hours</span></div>
+        <div class="count-box"><span class="count-num" id="minutes">00</span><span class="count-label">Mins</span></div>
+        <div class="count-box"><span class="count-num" id="seconds">00</span><span class="count-label">Secs</span></div>
+      </div>
+    </section>
+
+    <div class="nav-controls">
+      <button class="next-page-btn" data-next="1">Our Story ➔</button>
+    </div>
+  </div>
+
+  <!-- Page 1: Our Story & Meet the Couple -->
+  <div class="invitation-page" id="page-1">
+    <div class="silk-overlay"></div>
+    <div class="blooming-border border-top-left"></div>
+
+    <h2>Meet the Couple</h2>
+    <div class="couple-section">
+      <div class="person-card">
+        <div class="frame-container">
+          <img src="public\assets\IMG_20260223_154538.jpg" class="person-img" alt="The Groom">
+        </div>
+        <h3>Ritesh Pawar</h3>
+        <p>The Groom</p>
+      </div>
+      <div class="person-card">
+        <div class="frame-container">
+          <img src="public\assets\IMG_20260223_154509.jpg" class="person-img" alt="The Bride">
+        </div>
+        <h3>Kalyani Rathod</h3>
+        <p>The Bride</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Our Journey</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>Bride</h3>
+        <p class="script-font">BCA, MCA</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>Groom</h3>
+        <p class="script-font">D.ed, Ma</p>
+
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <button class="prev-page-btn" data-prev="0">Back</button>
+      <button class="next-page-btn" data-next="2">Events ➔</button>
+    </div>
+  </div>
+
+  <!-- Page 2: Invitation & Events -->
+  <div class="invitation-page" id="page-2">
+    <div class="silk-overlay"></div>
+    <div class="blooming-border border-top-left"></div>
+
+    <h2>Save the Date</h2>
+    <div class="mantra-text">20th April 2026</div>
+    <p>We request the honor of your presence as we celebrate our union.</p>
+
+    <div class="divider"></div>
+
+    <h2>Wedding Ceremonies</h2>
+    <div class="program-grid" style="display: grid; gap: 2rem; margin-top: 2rem;">
+      <div class="invitation-card">
+        <h3>Haldi & Mehendi</h3>
+        <p>18rd - 19th April | 10:00 AM</p>
+      </div>
+      <div class="invitation-card" style="border-width: 3px;">
+        <h3>The Wedding</h3>
+        <p>20th april | 07:00 PM</p>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <button class="prev-page-btn" data-prev="1">Back</button>
+      <button class="next-page-btn" data-next="3">Gallery ➔</button>
+    </div>
+  </div>
+
+  <!-- Page 3: Venue, Gallery & Family -->
+  <div class="invitation-page" id="page-3">
+    <div class="silk-overlay"></div>
+    <div class="blooming-border border-top-left"></div>
+
+    <h2>The Venue</h2>
+    <p class="mantra-text">sadiyapani, harshud</p>
+    <a href="https://maps.app.goo.gl/dbwUiXpX7GoMPrrt9" class="rsvp-btn" style="text-decoration: none;">Get
+      Directions</a>
+
+    <div class="divider"></div>
+
+    <h2>Glimpses of Love</h2>
+    <div class="gallery-container">
+      <div class="gallery-item">
+        <div class="photo-frame">
+          <img src="public/assets/download.jfif" alt="Engagement">
+        </div>
+        <div class="gallery-caption">The Engagement</div>
+      </div>
+      <div class="gallery-item">
+        <div class="photo-frame">
+          <img src="public/assets/download (2).jfif" alt="Haldi Rituals">
+        </div>
+        <div class="gallery-caption">Haldi Rituals</div>
+      </div>
+      <div class="gallery-item">
+        <div class="photo-frame">
+          <img src="public/assets/download (1).jfif" alt="Sangeet Dance">
+        </div>
+        <div class="gallery-caption">Sangeet Dance</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>With Blessings From</h2>
+    <div class="family-section">
+      <div>
+        <h3>Parents of Groom</h3>
+        <p>Mr. Meghnath & Mrs. Sindhu Pawar</p>
+      </div>
+      <div>
+        <h3>Parents of Bride</h3>
+        <p>Mr. & Mrs. Rathod</p>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <button class="prev-page-btn" data-prev="2">Back</button>
+      <button class="next-page-btn" data-next="4">respons ➔</button>
+    </div>
+  </div>
+
+  <!-- Page 4: RSVP -->
+  <div class="invitation-page" id="page-4">
+    <div class="silk-overlay"></div>
+    <div class="blooming-border border-top-left"></div>
+
+    <h2>Blessings & mesagges</h2>
+    <form class="rsvp-form" id="rsvp-form">
+      <input type="text" class="rsvp-input" placeholder="Full Name" required>
+      <input type="number" class="rsvp-input" placeholder="Guests" required>
+      <textarea class="rsvp-input" placeholder="Blessing Message..." rows="3"></textarea>
+      <button type="submit" class="rsvp-btn">Send via WhatsApp</button>
+    </form>
+
+    <div class="nav-controls">
+      <button class="prev-page-btn" data-prev="3">Back</button>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
