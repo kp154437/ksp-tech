@@ -197,7 +197,7 @@ h3 {
 }
 
 .script-font {
-  font-family: 'Great+Vibes', cursive;
+  font-family: 'Great Vibes', cursive;
 }
 
 .sanskrit-font {
@@ -889,7 +889,9 @@ h3 {
 
 .couple-names {
   font-size: 4.5rem;
-  font-family: 'Great Vibes', cursive;
+
+
+
   background: var(--gold-gradient);
   -webkit-background-clip: text;
   background-clip: text;
